@@ -18,6 +18,7 @@ import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -43,8 +44,8 @@ public class PetOwnerClient implements ClientModInitializer {
 					CompletableFuture.runAsync(() -> {
 						GameProfile playerProfile;
 						try {
-							playerProfile = Objects.requireNonNull(MinecraftClient.getInstance().getSessionService().fetchProfile(key, false)).profile();
-							usernameCache.put(key, Optional.ofNullable(playerProfile.getName()));
+							playerProfile = Objects.requireNonNull(MinecraftClient.getInstance().getApiServices().sessionService().fetchProfile(key, false)).profile();
+							usernameCache.put(key, Optional.ofNullable(playerProfile.name()));
 						} catch (NullPointerException e) {
 							usernameCache.put(key, Optional.empty());
 						}
@@ -58,10 +59,11 @@ public class PetOwnerClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		MidnightConfig.init("petowner", PetOwnerConfig.class);
 
+        var category = KeyBinding.Category.create(Identifier.of("petowner", "keys"));
 		keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 				"key.petowner.hide",
 				InputUtil.UNKNOWN_KEY.getCode(),
-				"category.petowner.title"
+				category
 		));
 
 		var enabledText = Text.translatable("text.petowner.message.enabled").formatted(Formatting.BOLD, Formatting.GREEN);

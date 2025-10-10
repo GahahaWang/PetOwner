@@ -2,26 +2,20 @@ package us.potatoboy.petowner.mixin;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAttachmentType;
 import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.Vec3d;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import us.potatoboy.petowner.client.PetOwnerClient;
-import org.joml.Matrix4f;
 import us.potatoboy.petowner.client.PetRenderState;
 import us.potatoboy.petowner.client.config.PetOwnerConfig;
 
@@ -31,14 +25,9 @@ import java.util.UUID;
 
 @Mixin(EntityRenderer.class)
 public abstract class OwnerNameTagRendering<T extends Entity, S extends EntityRenderState> {
-	@Final
-	@Shadow
-	protected EntityRenderDispatcher dispatcher;
 
-	@Shadow public abstract TextRenderer getTextRenderer();
-
-	@Inject(method = "render", at = @At("HEAD"))
-	private void render(S state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
+    @Inject(method = "render", at = @At("HEAD"))
+	private void render(S state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraState, CallbackInfo ci) {
 		PetRenderState petRenderState = (PetRenderState) state;
 
 		//If HUD is hidden
@@ -65,28 +54,7 @@ public abstract class OwnerNameTagRendering<T extends Entity, S extends EntityRe
 					PetOwnerClient.LOGGER.error("If you're trying to figure out why the mod doesn't work, it's cause you're in a dev env");
 			}
 
-			double d = state.squaredDistanceToCamera;
-			if (d <= 4096.0D) {
-				Vec3d vec3d = state.nameLabelPos;
-				if (vec3d != null) {
-					int y = 10 + (10 * i);
-					matrices.push();
-					matrices.translate(vec3d.x, vec3d.y + 0.5, vec3d.z);
-					matrices.multiply(this.dispatcher.getRotation());
-					matrices.scale(0.025F, -0.025F, 0.025F);
-					Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-					TextRenderer textRenderer = this.getTextRenderer();
-					float x = (float) (-textRenderer.getWidth(text) / 2);
-
-					float backgroundOpacity = MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F);
-					int backgroundColor = (int) (backgroundOpacity * 255.0F) << 24;
-
-					textRenderer.draw(text, x, (float) y, 553648127, false, matrix4f, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, backgroundColor, light);
-					textRenderer.draw(text, x, (float) y, Colors.WHITE, false, matrix4f, vertexConsumers, TextRenderer.TextLayerType.NORMAL, 0, light);
-
-					matrices.pop();
-				}
-			}
+            queue.submitLabel(matrices, state.nameLabelPos, 10 + (10*i), text, !state.sneaking, state.light, state.squaredDistanceToCamera, cameraState);
 		}
 	}
 

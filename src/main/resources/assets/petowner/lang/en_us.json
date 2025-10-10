@@ -11,6 +11,6 @@
   "text.petowner.message.enabled": "Showing Pet Names",
   "text.petowner.message.disabled": "Hiding Pet Names",
 
-  "category.petowner.title": "Pet Owner",
+  "key.category.petowner.keys": "Pet Owner",
   "key.petowner.hide": "Hide Owner"
 }
