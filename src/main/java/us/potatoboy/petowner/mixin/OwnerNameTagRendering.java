@@ -40,6 +40,8 @@ public abstract class OwnerNameTagRendering<T extends Entity, S extends EntityRe
 		if (!petRenderState.petOwner$getIsTargeted() && !PetOwnerConfig.alwaysShow) return;
 
 		List<UUID> ownerIds = petRenderState.petOwner$getOwnerIds();
+        //Interaction Entity do not have ownerIds
+        if (ownerIds == null) return; //if (state.entityType == EntityType.INTERACTION) return;
 		if (ownerIds.isEmpty()) return;
 
 		for (int i = 0; i < ownerIds.size(); i++) {
