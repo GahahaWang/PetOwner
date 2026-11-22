@@ -31,7 +31,7 @@ public abstract class OwnerNameTagRendering<T extends Entity, S extends EntityRe
 		PetRenderState petRenderState = (PetRenderState) state;
 
 		//If HUD is hidden
-		if (Minecraft.getInstance().options.hideGui) return;
+		if (Minecraft.getInstance().gui.hud.isHidden()) return;
 		//If the player is riding the entity
 		if (petRenderState.petOwner$getHasPassenger()) return;
 		//If the key is bound and owner is disabled
@@ -56,7 +56,7 @@ public abstract class OwnerNameTagRendering<T extends Entity, S extends EntityRe
 					PetOwnerClient.LOGGER.error("If you're trying to figure out why the mod doesn't work, it's cause you're in a dev env");
 			}
 
-			submitNodeCollector.submitNameTag(poseStack, state.nameTagAttachment, 10 + (10*i), text, !state.isDiscrete, state.lightCoords, state.distanceToCameraSq, camera);
+			submitNodeCollector.submitNameTag(poseStack, state.nameTagAttachment, 10 + (10*i), text, !state.isDiscrete, state.lightCoords, camera);
 		}
 	}
 
